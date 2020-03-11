@@ -1,8 +1,0 @@
-function Main.main 4
-call BasicGame.new 0
-pop local 0
-push local 0
-call BasicGame.run 1
-pop temp 0
-push constant 0
-return
