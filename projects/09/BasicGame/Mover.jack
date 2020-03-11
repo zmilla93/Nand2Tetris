@@ -1,0 +1,80 @@
+class Mover{
+
+	static int size, halfSize, speed;
+	field int x, y, maxX, maxY;
+
+	constructor Mover new(){
+		let x = 0;
+		let y = 0;
+		let size = 20;
+		let halfSize = size/2;
+		let speed = 10;
+		let maxX = 511-size;
+		let maxY = 255-size;
+		return this;
+	}
+	
+	method void eraseMover(){
+		do Screen.setColor(false);
+		do Screen.drawCircle(x+halfSize, y+halfSize, halfSize);
+		do Screen.setColor(true);
+		return;
+	}
+	
+	method void drawMover(){
+		do Screen.drawCircle(x+halfSize, y+halfSize, halfSize);
+		return;
+	}
+	
+	method void moveUp(){
+		do eraseMover();
+		if(y-speed>-1){
+			let y=y-speed;
+		}
+		if((y-speed=0) | (y-speed<0)){
+			let y = 0;
+		}
+		do drawMover();
+		return;
+	}
+	
+	method void moveDown(){
+		do eraseMover();
+		if((y+speed)<maxY){
+			let y=y+speed;
+		}
+		if((y+speed=maxY) | (y+speed>maxY)){
+			let y=maxY;
+		}
+		do drawMover();
+		return;
+	}
+	
+	method void moveLeft(){
+		do eraseMover();
+		if((x-speed)>-1){
+			let x=x-speed;
+		}
+		if((x-speed=0) | (x-speed<0)){
+			let x = 0;
+		}
+		do drawMover();
+		return;
+	}
+	
+	method void moveRight(){
+		do eraseMover();
+		if((x+speed)<maxX){
+			let x=x+speed;
+		}
+		if((x+speed=maxX) | (x+speed>maxX)){
+			let x=maxX;
+		}
+		do drawMover();
+		return;
+	}
+	
+	method void dispose(){
+		return;
+	}
+}

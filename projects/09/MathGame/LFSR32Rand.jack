@@ -1,0 +1,178 @@
+// LFSR32Rand.jack -- 32-bit LFSR PRNG for Hack
+//
+// Copyright (C) 2016, Mark A. Armbrust.  All rights reserved.
+// Permission granted for educational use.
+
+/**
+ *  LFSR32Rand implements a pseudorandom number generator based on a Linear
+ *  Feedback Shift Register.
+ *
+ *  Basic usage:
+ *      lfsr = LFSR32Rand.new();    // Create a new random number generator.
+ *      n = lfsr.rand();            // Return 0..32767, inclusive.
+ *      n = lfsr.randRange(low, high);  // Returns low..high, inclusive.
+ *      do lfsr.dispose();          // Deallocate lfsr object.
+ *
+ *  Additional functions:
+ *      do lfsr.seed(seed1, seed2); // Starts a new random number sequence.
+ *      i = lfsr.randInt();         // Return -32768..32768, inclusive.
+ *      b = lfsr.randBit();         // Return 0 or 1.
+ *
+ *
+ *  An LFSR is a serial-in, parallel-out, shift register with two or more of
+ *  its output bits fed back into its input through an N-input XOR gate.
+ *
+ *                       Left Shift Register
+ *              +---+---+---+---+---+---+---+---+---+
+ *              |   |   |   |   |   |   |   |   |   |<--
+ *              +---+---+---+---+---+---+---+---+---+   |
+ *                |               |                     |
+ *                |                ----->               |
+ *                |                       XOR ----------
+ *                 --------------------->
+ *
+ *  Each time the register shifts, a new pseudorandom bit enters the register.
+ *  These bits can be combined into words to form pseudorandom values.
+ *
+ *  LFSR32Rand uses a 32-bit shift register and generates a bit sequence with
+ *  cycle length 2^32-1 (4.3e+09).  Since LFSR32Rand uses 16 bits to generate
+ *  each word, 2^28-1 (2.7e+08) pseudorandom words can be generated before the
+ *  LFSR repeats.
+ */
+
+class LFSR32Rand {
+    field int lsw;
+    field int msw;
+
+/**
+ *  Construct a new LFSR Random number generator.
+ */
+    constructor LFSR32Rand new()
+    {
+        do seed(0, 0);      // Set default seed.
+        return this;
+    }
+
+/**
+ *  Deallocate an LFSR32Rand object.
+ */
+    method void dispose()
+    {
+        do Memory.deAlloc(this);
+        return;
+    }
+
+/**
+ *  Seed the random number generator.
+ *
+ *  Starts a new random number sequence.  If only one seed word is used,
+ *  pass a non-zero constant for seed 2.
+ *
+ *  Note that if 0,0 is passed as the seed, the default seed value is used.
+ */
+    method void seed(int seed1, int seed2)
+    {
+        if ((seed1 | seed2) = 0) {
+            let lsw = 23294;    // 5AFE
+            let msw = -4083;    // F00D
+        } else {
+            let lsw = seed1;
+            let msw = seed2;
+        }
+        return;
+    }
+
+/**
+ *  Return a random bit.
+ *
+ *  Advances the LFSR and returns the newly created (input) bit.
+ */
+    method int randBit()
+    {
+        var int bit;
+
+        if ((msw | lsw) = 0) {
+            // msw = lsw = 0 causes LFSR to hang; reset default seed.
+            // (This should never happen, but...)
+            do seed(0, 0);
+        }
+
+        // Shift register taps are bits 31, 22, 12, 5 = 0x80401020
+        // Next bit is the 4-way Xor of the feedback taps.
+
+        // Because Xor is hard in Jack, this code counts the number of
+        // taps that are 1 and sets bit to 1 if the count is odd.
+
+        let bit = ( (msw < 0)               // true if 0x80000000 set
+                  + ((msw & 64) = 64)       // true if 0x00400000 set
+                  + ((lsw & 4096) = 4096)   // true if 0x00001000 set
+                  + ((lsw & 32) = 32)       // true if 0x00000020 set
+                  ) & 1;
+
+        // Update SR -- doubleword left shift.
+        let msw = (msw+msw) - (lsw < 0);    // '<' returns -1 if true
+        let lsw = lsw+lsw + bit;
+
+        return bit;
+    }
+
+    /**
+     *  Return a random integer, -32768..32767.
+     */
+    method int randInt()
+    {
+        var int i;  // = 0
+
+        while (i < 16) {
+            do randBit();
+            let i = i+1;
+        }
+        return lsw;
+    }
+
+    /**
+     *  Return a random number, 0..32767.
+     */
+    method int rand()
+    {
+        return randInt() & 32767;
+    }
+
+    /**
+     *  Return a random integer in the range min..max, inclusive.
+     *
+     *  If min > max, or max-min > 32767, returns min.
+     */
+    method int randRange(int min, int max)
+    {
+        var int r, s, ret;
+
+        let r = rand();
+        let s = max-min;
+        if (s = 32767) {
+            return min+r;       // Full range request
+        }
+        if (s < 1) {
+            return min;         // Illegal range or max = min
+        }
+
+        // There are two important issues in scaling.
+        //   1) Hack cannot easily compute the scaling divisor for mod 32768.
+        //      The raw random number must be treated as if it was mod 32767.
+        //      Therefore, rand() value 32767 must be discarded.
+        //   2) Because of integer truncation, the scaling divisor is rounded
+        //      down.  This can cause the scaled value to be too large.
+        //      Therefore, the scaled value must be discarded if it is out of
+        //      range.
+
+        let s = 32767/(s+1);
+
+        let ret = min+(r/s);
+        while ((r = 32767) | (ret > max)) {
+            let r = rand();
+            let ret = min+(r/s);
+        }
+        return ret;
+    }
+
+}

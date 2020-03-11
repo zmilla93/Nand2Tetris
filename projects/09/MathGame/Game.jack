@@ -1,0 +1,48 @@
+class Game{
+	
+	field int seed1, seed2;
+
+	constructor Game new(){
+		return this;
+	}
+	
+	method void setSeed(int a, int b) {
+		let seed1 = a;
+		let seed2 = b;
+		return;
+	}
+
+	method void run(){
+		var int a, b, sum, answer;
+		var string out;
+		var LFSR32Rand rand;
+		var char key;
+		let rand = LFSR32Rand.new();
+		do rand.seed(seed1, seed2);
+		// rand.seed(123,321);
+		while(true){
+			let a = rand.randRange(1,50);
+			let b = rand.randRange(1,50);
+			let sum = a+b;
+			do Output.printInt(a);
+			do Output.printString("+");
+			do Output.printInt(b);
+			do Output.printString("=?");
+			do Output.println();
+			let answer = Keyboard.readInt("SUM: ");
+			if(sum=answer){
+				do Output.printString("Correct!");
+			}else{
+				do Output.printString("Wrong! The correct answer is ");
+				do Output.printInt(sum);
+			}
+			do Output.println();
+			do Sys.wait(2000);
+			do Screen.clearScreen();
+			do Output.moveCursor(0,0);
+		}
+		return;
+	}
+	
+	
+}

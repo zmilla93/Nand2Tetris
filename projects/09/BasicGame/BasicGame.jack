@@ -1,0 +1,37 @@
+class BasicGame{
+
+	field int fix;
+	field Mover m;
+	
+	constructor BasicGame new(){
+		let m = Mover.new();
+		do m.drawMover();
+		return this;
+	}
+	
+	method void run(){
+		var char key;
+		while(true){
+			let key = Keyboard.keyPressed();
+			//Left
+			if(key=130){
+				do m.moveLeft();
+			}
+			//Up
+			if(key=131){
+				do m.moveUp();
+			}
+			//Right
+			if(key=132){
+				do m.moveRight();
+			}
+			//Down
+			if(key=133){
+				do m.moveDown();
+			}
+		}
+		return;
+	}
+	
+	
+}

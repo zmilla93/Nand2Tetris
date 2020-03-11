@@ -1,0 +1,15 @@
+class Main{
+
+	/**
+	  *	A basic quiz game that gives you addition problems.
+	  */
+	
+	function void main(){
+		var Game game;
+		let game = Game.new();
+		do game.setSeed(234, 1223);
+		do game.run();
+		return;
+	}
+
+}

@@ -1,0 +1,14 @@
+class Main{
+
+	/**
+	  *	This is an example game that allows you to move a 'player' around the screen.
+	  */
+
+	function void main(){
+		var BasicGame game;
+		let game = BasicGame.new();
+		do game.run();
+		return;
+	}
+
+}
