@@ -17,15 +17,6 @@ SysTest/
 source/
 tools/
 
-# Assembler
-projects/06/
-# Virtual Machine 
-projects/07/
-projects/08/
-# Compiler
-projects/10/
-projects/11/
-
 # Java/IDE
 bin/
 out/
