@@ -9,12 +9,29 @@
  */
 class Math {
 
+    static Array powersOfTwo;
+
     /** Initializes the library. */
     function void init() {
+        // Generate the powers of two for use later
+        var int i, n;
+        let i = 0;
+        let n = 1;
+        let powersOfTwo = Array.new(16);
+        while(i<16){
+            let powersOfTwo[i] = n;
+            let n = n + n;
+            let i = i + 1;
+        }
+        return;
     }
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
+        if(x < 0){
+            return 0 - x; 
+        }
+        return x;
     }
 
     /** Returns the product of x and y. 
@@ -23,6 +40,18 @@ class Math {
      *  the Jack expressions x*y and multiply(x,y) return the same value.
      */
     function int multiply(int x, int y) {
+        var int sum, shiftedX, i;
+        let sum = 0;
+        let shiftedX = x;
+        let i = 0;
+        while(i < 16){
+            if(~((y & powersOfTwo[i]) = 0)){
+                let sum = sum + shiftedX;
+            }
+            let shiftedX = shiftedX + shiftedX;
+            let i = i + 1;
+        }
+        return sum;
     }
 
     /** Returns the integer part of x/y.
@@ -31,17 +60,80 @@ class Math {
      *  the Jack expressions x/y and divide(x,y) return the same value.
      */
     function int divide(int x, int y) {
+        var int q, absx, absy;
+        var boolean neg;
+        let absx = Math.abs(x);
+        let absy = Math.abs(y);
+        let neg = false;
+        if((x < 0) | (y < 0)){
+            let neg = true;
+            if((x < 0) & (y < 0)){
+                let neg = false;
+            }
+        }
+        if (absy > absx) {
+            return 0;
+        }
+        let q = Math.divideUnsigned(absx, 2 * absy);
+        if((absx - (2 * q * absy)) < absy) {
+            if(neg){
+                return 0 - (2 * q);
+            }
+            return 2 * q;
+        } else {
+            if(neg){
+                return 0 - (2 * q) + 1;
+            }
+            return (2 * q) + 1;
+        }
+    }
+
+    /** An optimized version of division that only works on positive integers. */
+    function int divideUnsigned(int x, int y) {
+        var int q;
+        if (y > x) {
+            return 0;
+        }
+        let q = Math.divideUnsigned(x, 2 * y);
+        if((x - (2 * q * y)) < y) {
+            return 2 * q;
+        } else {
+            return (2 * q) + 1;
+        }
     }
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
+        var int y, j, n, p, p2;
+        let y = 0;
+        let n = 16;
+        let j = (n/2)-1;
+        while(j > -1) {
+            let p = y + powersOfTwo[j];
+            let p2 = p * p;
+            if(((p2 < x) | (p2 = x)) & p2 > 0) {
+                let y = y + powersOfTwo[j];
+            }
+            let j = j - 1;
+        }
+        return y;
     }
 
     /** Returns the greater number. */
     function int max(int a, int b) {
+        if(a > b) {
+            return a;
+        }
+        return b;
     }
 
     /** Returns the smaller number. */
     function int min(int a, int b) {
+        if (a < b) {
+            return a;
+        }
+        return b;
     }
+
+
 }

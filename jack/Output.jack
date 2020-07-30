@@ -15,18 +15,37 @@
  * as a small filled square, indicates where the next character will be displayed.
  */
 class Output {
-
     // Character map for displaying characters
-    static Array charMaps; 
+    static Array charMaps, screen;
+    static Array powersOfTwo;
+    static int cursorX, cursorY;
 
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
+        var int i, n;
+        let cursorX = 0;
+        let cursorY = 0;
+        // The screen is mapped to RAM[16384 - 24576]
+        let screen = 16384;
+        do Output.initMap();
+
+        
+        let i = 0;
+        let n = 1;
+        let powersOfTwo = Array.new(16);
+        while(i<16){
+            let powersOfTwo[i] = n;
+            let n = n + n;
+            let i = i + 1;
+        }
+
+        return;
     }
 
     // Initializes the character map array
     function void initMap() {
         var int i;
-    
+        
         let charMaps = Array.new(127);
         
         // Black square, used for displaying non-printable characters.
@@ -71,7 +90,7 @@ class Output {
         do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
         do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-        do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
+        do Output.create(65,12,30,51,51,63,51,51,51,51,0,0); // A
         do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
         do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
         do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -137,7 +156,7 @@ class Output {
         do Output.create(125,7,12,12,12,56,12,12,12,7,0,0);    // }
         do Output.create(126,38,45,25,0,0,0,0,0,0,0,0);        // ~
 
-	return;
+	    return;
     }
 
     // Creates the character map array of the given character index, using the given values.
@@ -147,7 +166,6 @@ class Output {
 
 	let map = Array.new(11);
         let charMaps[index] = map;
-
         let map[0] = a;
         let map[1] = b;
         let map[2] = c;
@@ -159,7 +177,6 @@ class Output {
         let map[8] = i;
         let map[9] = j;
         let map[10] = k;
-
         return;
     }
     
@@ -176,28 +193,133 @@ class Output {
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
+        if((i < 0) | (i > 22)) {
+            do Sys.error(20);
+        }
+        if((j < 0) | (j > 63)) {
+            do Sys.error(20);
+        }
+        let cursorX = j;
+        let cursorY = i;
+        return;
     }
 
     /** Displays the given character at the cursor location,
-     *  and advances the cursor one column forward. */
+     *  and advances the cursor one column forward.
+     *
+     *  Characters are 8 pixels wide, RAM words are 16 bits.
+     *  This means each RAM word holds data for exactly 2 characters,
+     *  and a mask is used to preseve the half of the word not being written to. */
     function void printChar(char c) {
+        var Array charmap;
+        var int bitmap, address, mod, mask, i;
+        // Calculate starting address and check which half of the word needs to be masked
+        let charmap = Output.getMap(c);
+        let address = (cursorX/2) + (cursorY * 32 * 11);
+        let mod = cursorX & 1;
+        if(mod = 0) {
+            let mask = -256;    //1111111100000000
+        } else {
+            let mask = 255;     //0000000011111111
+        }
+        // Draw the character
+        let i = 0;
+        while(i < 11) {
+            let bitmap = charmap[i];
+            // If writing to the upper half of a word, shift the bitmap over 8 bits.
+            if(mask > 0) {
+                let bitmap = bitmap * 256;
+            }
+            let screen[address] = (screen[address] & mask) | bitmap;
+            let address = address + 32;
+            let i = i + 1;
+        }
+        // Move Cursor
+        if(cursorX = 63) {
+            do Output.println();
+        } else {
+            let cursorX = cursorX + 1;
+        }
+        return;
+    }
+    
+    /*  An easier to understand but significantly slower character drawing function. */
+    function void printCharSlow(char c) {
+        var Array charMap;
+        var int startingX, startingY;
+        var int i, j;
+        let charMap = Output.getMap(c);
+        let startingX = cursorX * 8;    // +7
+        let startingY = cursorY * 11;   // +10
+        let i = 0;
+        let j = 0;
+        // Draw character
+        while(j < 11) {
+            while(i < 8) {
+                //Draw pixel
+                if((charMap[j] & powersOfTwo[i]) > 0) {
+                    do Screen.setColor(true);
+                } else {
+                    do Screen.setColor(false);
+                }
+                do Screen.drawPixel(startingX + i, startingY + j);
+                let i = i + 1;
+            }
+            let i = 0;
+            let j = j + 1;
+        }
+        // Move Cursor
+        if(cursorX = 63) {
+            do Output.println();
+        } else {
+            let cursorX = cursorX + 1;
+        }
+        return;
     }
 
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+        var int i, length;
+        let length = s.length();
+        while(i < length) {
+            do Output.printChar(s.charAt(i));
+            let i = i + 1;
+        }
+        return;
     }
 
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+        var String s;
+        let s = String.new(10);
+        do s.setInt(i);
+        do Output.printString(s);
+        do s.dispose();
+        return;
     }
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+        let cursorX = 0;
+        let cursorY = cursorY + 1;
+        if(cursorY > 22) {
+            let cursorY = 0;
+        }
+        return;
     }
 
     /** Moves the cursor one column back. */
     function void backSpace() {
+        let cursorX = cursorX - 1;
+        if(cursorX < 0) {
+            let cursorX = 22;
+            let cursorY = cursorY - 1;
+        }
+        if(cursorY < 0) {
+            let cursorY = 0;
+        }
+        return;
     }
 }

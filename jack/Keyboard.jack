@@ -5,11 +5,13 @@
 
 /**
  * A library for handling user input from the keyboard.
+ * The keyboard memory map is a single 16 bit word located at address 24576.
  */
 class Keyboard {
 
     /** Initializes the keyboard. */
     function void init() {
+        return;
     } 
 
     /**
@@ -33,6 +35,7 @@ class Keyboard {
      * F1 - F12 = 141 - 152
      */
     function char keyPressed() {
+        return Memory.peek(24576);
     }
 
     /**								
@@ -41,6 +44,25 @@ class Keyboard {
      * of the pressed key.
      */
     function char readChar() {
+        var char c, c2;
+        do Output.printChar(0);
+        let c = Keyboard.keyPressed();
+        while(c = 0){
+            let c = Keyboard.keyPressed();
+        }
+        while(~(Keyboard.keyPressed() = 0)) {
+            let c2 = Keyboard.keyPressed();
+            if(~(c2 = 0)) {
+                let c = c2;
+            }
+        }
+        if(~(c = 129)) {
+            do Output.backSpace();
+        }
+        if(~(c = 128)) {
+            do Output.printChar(c);
+        }
+        return c;
     }
 
     /**								
@@ -49,6 +71,59 @@ class Keyboard {
      * and returns its value. Also handles user backspaces.
      */
     function String readLine(String message) {
+        var String input, buffer;
+        var int i, maxLength;
+        var char c;
+        var boolean scanning, check;
+        do Output.printString(message);
+        let maxLength = 10;
+        let input = String.new(maxLength);
+        let scanning = true;
+        while(scanning) {
+            let check = false;
+            let c = Keyboard.readChar();
+            // New Line
+            if(c = 128) {
+                do Output.println();
+                let scanning = false;
+                let check = true;
+            }
+            // Backspace
+            if(c = 129) {
+                // do Output.backSpace();
+                if(input.length() > 0) {
+                    do Output.backSpace();
+                    do input.eraseLastChar();
+                }
+                let check = true;
+            }
+            // All other characters
+            if(~check) {
+                // Resize the string as needed
+                if((input.length() + 2) > maxLength) {
+                    let buffer = String.new(maxLength);
+                    // Copy input to buffer
+                    let i = 0;
+                    while(i < input.length()) {
+                        let buffer = buffer.appendChar(input.charAt(i));
+                        let i = i + 1;
+                    }
+                    // Resize
+                    let maxLength = maxLength + 10;
+                    do input.dispose();
+                    let input = String.new(maxLength);
+                    // Copy buffer back to input
+                    let i = 0;
+                    while(i < buffer.length()) {
+                        let input = input.appendChar(buffer.charAt(i));
+                        let i = i + 1;
+                    }
+                    do buffer.dispose();                    
+                }
+                let input = input.appendChar(c);
+            }
+        }
+        return input;
     }   
 
     /**								
@@ -58,5 +133,8 @@ class Keyboard {
      * entered text is detected). Also handles user backspaces. 
      */
     function int readInt(String message) {
+        var String input;
+        let input = Keyboard.readLine(message);
+        return input.intValue();
     }
 }

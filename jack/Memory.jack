@@ -10,25 +10,123 @@
  */ 
 class Memory {
 
-    /** Initializes the class. */
+    static Array memory;
+    static int freeList;
+    // static int freeList, length, next;
+
+    /** Initializes the class. 
+     *  Heap = RAM[2048 - 16383] */
     function void init() {
+        let memory = 0;
+        let memory[2048] = 14335;
+        let memory[2049] = 0;
+        let freeList = 2048;
+        return;
     }
 
     /** Returns the RAM value at the given address. */
     function int peek(int address) {
+        var int value;
+        let value = memory[address];
+        return value;
     }
 
     /** Sets the RAM value at the given address to the given value. */
     function void poke(int address, int value) {
+        let memory[address] = value;
+        return;
     }
 
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
-    function int alloc(int size) {
+    function int alloc(int targetSize) {
+        var int base, previousBase, nextBase, spliceBase;
+        var int segmentSize, remainingSize;
+        let previousBase = 0;
+        let spliceBase = 0;
+        let base = freeList;
+        let segmentSize = memory[base];
+        let nextBase = memory[base+1];
+        // Loop until a long enough segment is found, or the end of the heap is reached
+        while(((segmentSize - 1) < targetSize) & (~(nextBase = 0))) {
+            let previousBase = base;
+            let base = nextBase;
+            let segmentSize = memory[base];
+            let nextBase = memory[base+1];
+        }
+        // If no segment is found, return an error
+        if((targetSize - 1) > segmentSize) {
+            return -1;
+        }
+        let remainingSize = segmentSize - targetSize - 1;
+        // If remainder is too short to be used, the entire segment is allocated;
+        if(remainingSize < 3){
+            let targetSize = segmentSize - 1;
+            let spliceBase = nextBase;
+        }
+        // Update linked list
+        let spliceBase = base + targetSize + 1;
+        let memory[spliceBase] = remainingSize;
+        let memory[spliceBase + 1] = nextBase;
+        if(previousBase = 0) {
+            let freeList = spliceBase;
+        }
+        else {
+            let memory[previousBase + 1] = spliceBase;
+        }
+        // Store allocated size, then return segment
+        let memory[base] = targetSize + 1;
+        return base + 1;
     }
 
-    /** De-allocates the given object (cast as an array) by making
-     *  it available for future allocations. */
+    /** De-allocates the given object (cast as an array) by making it available for future allocations. */
     function void deAlloc(Array o) {
-    }    
+        var int base, previousBase, nextBase;
+        var int length;
+        let base = o - 1;
+        let length = memory[base];
+        let previousBase = 0;
+        let nextBase = freeList;
+        // Loop to find the best location to reinsert the deallocated segment
+        while((nextBase < base) & ~(nextBase = 0)) {
+            let previousBase = nextBase;
+            let nextBase = memory[previousBase + 1];
+        }
+        // Readd deallocated segment to linked list
+        if(previousBase = 0) {
+            let freeList = base;
+            let memory[base + 1] = nextBase;
+        }
+        else {
+            let memory[previousBase + 1] = base;
+            let memory[base + 1] = nextBase;
+        }
+        do Memory.defrag();
+        return;
+    }
+
+    /** Defragments the heap by merging logically seperate but physically sequential memory segments. */
+    function void defrag() {
+        var int base, nextBase, size, nextSize, diff;
+        let base = freeList;
+        let nextBase = memory[base + 1];
+        // Loop through the heap
+        while(~(nextBase = 0)) {
+            let diff = 0;
+            let size = memory[base];
+            let diff = nextBase - (base + size);
+            // If two logical segments are physically connected, merge them. Otherwise, move on to the next base.
+            if(diff = 0) {
+                let nextSize = memory[nextBase];
+                let memory[base] = size + nextSize;
+                let memory[base + 1] = memory[nextBase + 1];
+                let nextBase = memory[nextBase + 1];
+            } else {
+                let base = memory[base + 1];
+                let nextBase = memory[nextBase + 1];
+            }
+        }
+        return;
+    }
+
 }
