@@ -17,7 +17,7 @@ SysTest/
 source/
 tools/
 
-# Java/IDE
+# Java
 bin/
 out/
 *.iml
