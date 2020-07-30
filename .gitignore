@@ -17,6 +17,10 @@ SysTest/
 source/
 tools/
 
+# Specific Files
+hardware/04/**/*.hack
+hardware/05/*.hack
+
 # Java
 bin/
 out/
