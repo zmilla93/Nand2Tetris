@@ -65,7 +65,8 @@ The hardware design used by the course is named HACK. Circuits are designed usin
 
 ## The Jack Programming Language
 The target language for the course's compiler is the Jack programming language, an object orient language that somewhat resembles Java. It supports strings, arrays, basic math, basic drawing, a keyboard, and direct memory access. The Jack standard library is, of course, written in Jack.<br>
-**[The Jack Standard Library](https://github.com/zmilla93/Nand2Tetris/tree/master/jack)**
+
+**[Jack Standard Library Source Code](https://github.com/zmilla93/Nand2Tetris/tree/master/jack)**
 
 ## The Compilation Process
 The compilation process again resembles Java by being split into 3 parts; a compiler, a virtual machine, and an assembler. The compiler converts an OOP Jack program into a platform agnostic virtual machine language program. The virtual machine then translates the VM program into a hardware specific HACK program. Finally, the assembler converts the HACK program into machine code that is runnable by the HACK hardware described previously.<br>
