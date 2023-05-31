@@ -1,18 +1,18 @@
 # Nand2Tetris
-Nand2Tetris is a computer science course by the MIT Press. It takes you through the steps of building a computer starting with nothing more than simple NAND gates. It then guides you through the process of building an assembler, virtual machine, and compiler for an objected oriented programming language. This repo contain's only my own work and excludes the extra course files.<br>
+Nand2Tetris is a computer science course by the MIT Press. It takes you through the steps of building a computer starting with nothing more than simple NAND gates. It then guides you through the process of building an assembler, virtual machine, and compiler for an objected oriented programming language. This repo contains only my own work and excludes the extra course files.<br>
 
 **[Course Website](https://www.nand2tetris.org/)**
 
 ## The Hardware
-The hardware design used by the course is named HACK. Circuits are designed using a Hardware Description Language (HLD) with the `.hdl` extension. Machine code has the `.hack` extension.
+The hardware design used by the course is named HACK. Circuits are designed using a Hardware Description Language (HDL) with the `.hdl` extension. Machine code has the `.hack` extension.
+
+**[Hardware Source Code](https://github.com/zmilla93/Nand2Tetris/tree/master/hardware)**
 
 #### Computer specs
 - 16 bit
 - 32K RAM
 - 512x256 black & white screen
 - Keyboard
-
-**[Hardware Code](https://github.com/zmilla93/Nand2Tetris/tree/master/hardware)**
 
 <details>
   <summary>Chapter 1 - Boolean Logic</summary>
