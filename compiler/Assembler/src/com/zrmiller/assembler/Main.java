@@ -60,7 +60,7 @@ public class Main {
             while (p.hasMoreCommands()) {
                 p.advance();
                 if (!p.rawText().equals("")) {
-                    String s = "";
+                    StringBuilder line = new StringBuilder();
                     if (debugText && p.lineCount() <= debugMaxLine) {
                         String debugD = p.dest() != null ? p.dest() : "NULL";
                         String debugC = p.comp() != null ? p.comp() : "NULL";
@@ -71,27 +71,28 @@ public class Main {
                     switch (p.commandType()) {
                         case A:
                             if (p.symbol().matches("\\d+")) {
-                                s = Integer.toBinaryString(Integer.parseInt(p.symbol()));
+                                line.append(Integer.toBinaryString(Integer.parseInt(p.symbol())));
                             } else {
                                 if (!sym.contains(p.symbol())) {
                                     sym.addEntry(p.symbol());
                                 }
                                 int i = sym.getAddress(p.symbol());
-                                s = Integer.toBinaryString(i);
+                                line.append(Integer.toBinaryString(i));
                             }
-                            while (s.length() < 16) {
-                                s = "0" + s;
+                            while (line.length() < 16) {
+                                line.insert(0, "0");
                             }
+                            break;
                         case L:
                             break;
                         case C:
-                            s = "111" + Code.comp(p.comp()) + Code.dest(p.dest()) + Code.jump(p.jump());
+                            line = new StringBuilder("111" + Code.comp(p.comp()) + Code.dest(p.dest()) + Code.jump(p.jump()));
                             break;
                         default:
                             break;
                     }
-                    if (!s.equals("")) {
-                        output.write(s + "\n");
+                    if (!line.toString().equals("")) {
+                        output.write(line + "\n");
                     }
                 }
             }
