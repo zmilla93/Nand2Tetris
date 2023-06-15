@@ -15,7 +15,7 @@ public class Main {
 
     public static void main(String[] args) {
 
-        //FILE HANDLING
+        // File handling
         if (args.length > 0 || !inputFile.equals("")) {
             if (args.length > 0) {
                 inputFile = args[0];
@@ -28,31 +28,35 @@ public class Main {
             }
             File outputFile = new File(Main.outputFile);
             if (outputFile.isFile()) {
-                System.out.println("[MAIN] \"" + Main.outputFile + " already exists. Overwriting previous file.");
+                System.out.println("Output file \"" + Main.outputFile + "\" already exists. Overwriting previous file.");
             }
             try {
                 output = new PrintWriter(Main.outputFile);
             } catch (FileNotFoundException e) {
-                System.out.println("[MAIN] Invalid output file name : " + Main.outputFile);
+                System.out.println("Invalid output file name : " + Main.outputFile);
             }
 
             // Create parser
             Parser p = new Parser(Main.inputFile);
             SymbolTable sym = new SymbolTable();
-            System.out.println("Parsing...");
+            System.out.println("Assembler started...");
 
             // First Pass - Adds all symbols to symbol table
-            System.out.println("First Pass, adding symbols to symbol table...");
+            System.out.println("First pass, adding symbols to symbol table...");
             while (p.hasMoreCommands()) {
                 p.advance();
                 if (p.commandType() == CommandType.L) {
                     sym.addEntry(p.symbol(), p.lineCount());
+                    if (debugText) System.out.println(" --- " + p.symbol());
                 }
             }
-            //Second Pass
+            // Second Pass
             p = new Parser(Main.inputFile);
-            System.out.println("Second Pass...");
-            boolean lineBreak = false;
+            System.out.println("Second pass, generating machine code...");
+            if(debugText){
+                System.out.println(getFormattedLine(new String[]{"Line", "Text", "Type", "Dest", "Comp", "Jump"}));
+                System.out.println(getFormattedLine(new String[]{"----", "----", "----", "----", "----", "----"}));
+            }
             while (p.hasMoreCommands()) {
                 p.advance();
                 if (!p.rawText().equals("")) {
@@ -61,7 +65,7 @@ public class Main {
                         String debugD = p.dest() != null ? p.dest() : "NULL";
                         String debugC = p.comp() != null ? p.comp() : "NULL";
                         String debugJ = p.jump() != null ? p.jump() : "NULL";
-                        String[] debugArr = {"(" + p.lineCount() + ")", "-----", p.rawText(), p.commandType().toString(), debugD, debugC, debugJ};
+                        String[] debugArr = {"(" + p.lineCount() + ")", p.rawText(), p.commandType().toString(), debugD, debugC, debugJ};
                         System.out.println(getFormattedLine(debugArr));
                     }
                     switch (p.commandType()) {
@@ -93,24 +97,27 @@ public class Main {
             }
             p.close();
             output.close();
-            System.out.println("Parsing completed successfully!\nLine Count : " + p.lineCount());
+            System.out.println("Line count : " + p.lineCount());
+            System.out.println("Assembly completed successfully!");
         }
-        System.out.println("Assembler Closed");
     }
 
     public static String getFormattedLine(String[] in) {
-        String line = "";
+        StringBuilder line = new StringBuilder();
         int columnWidth = 10;
-        int i;
-        for (String s : in) {
-            line += s;
-            i = s.length();
-            while (i < columnWidth) {
-                line += " ";
-                i++;
+        int symbolColumnWidth = 20;
+        int width;
+        for (int i = 0; i < in.length; i++) {
+            String s = in[i].equals("") ? "-" : in[i];
+            line.append(s);
+            width = s.length();
+            int targetWidth = i == 1 ? symbolColumnWidth : columnWidth;
+            while (width < targetWidth) {
+                line.append(" ");
+                width++;
             }
         }
-        return line;
+        return line.toString();
     }
 
 }
