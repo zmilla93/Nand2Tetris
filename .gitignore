@@ -29,3 +29,4 @@ out/
 .settings/
 .classpath
 .project
+*.jar
