@@ -5,7 +5,7 @@ import java.util.Objects;
 
 public class Main {
 
-    private static String fileInString = "D:\\Programming\\Test\\compile";
+    private static String fileInString = "";
     private static String fileOutString = "";
     private static int fileCount = 0;
     private static String[] fileInStringArray;
@@ -22,7 +22,10 @@ public class Main {
             }
         }
         File fileIn = new File(fileInString);
-        if (fileIn.isFile() && fileInString.matches(".+\\.vm\\z")) {
+        if (fileIn.isFile()) {
+            if (!fileInString.matches(".+\\.vm\\z")) {
+                terminateEarly("Input file must be a .vm file or a directory containing vm files.");
+            }
             // Single file
             fileInStringArray = new String[1];
             fileInStringArray[0] = fileInString;
@@ -35,6 +38,7 @@ public class Main {
                     fileCount++;
                 }
             }
+            if (fileCount == 0) terminateEarly("No .vm files found in folder \"" + fileInString + "\".");
             fileInStringArray = new String[fileCount];
             int i = 0;
             for (File f : Objects.requireNonNull(fileIn.listFiles())) {
@@ -45,8 +49,8 @@ public class Main {
             }
         } else {
             // Invalid input file/directory
-            System.out.println("No file or directory found at \"" + fileInString + "\"\nTerminating Virtual Machine");
-            System.exit(0);
+            if (fileInString.equals("")) terminateEarly("No file or directory specified.");
+            else terminateEarly("No file or directory found at \"" + fileInString + "\".");
         }
         CodeWriter code = new CodeWriter(fileOutString, false, false);
         for (String s : fileInStringArray) {
@@ -101,7 +105,7 @@ public class Main {
         StringBuilder ret = new StringBuilder("\t\t - ");
         int columnWidth = 30;
         for (String s : text) {
-            if(s == null) s = "NULL";
+            if (s == null) s = "NULL";
             ret.append(s);
             int length = s.length();
             while (length < columnWidth) {
@@ -110,6 +114,12 @@ public class Main {
             }
         }
         return ret.toString();
+    }
+
+    private static void terminateEarly(String text) {
+        System.out.println(text);
+        System.out.println("Terminating virtaul machine.");
+        System.exit(0);
     }
 
 }
