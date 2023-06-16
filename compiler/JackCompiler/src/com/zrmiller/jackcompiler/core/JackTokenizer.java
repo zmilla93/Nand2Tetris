@@ -13,30 +13,17 @@ import java.util.regex.Pattern;
 
 public class JackTokenizer {
 
-    // TODO : String parsing
-
-    // TODO : Remove
-    private LinkedList<Token> tokens = new LinkedList();
-    private int currentIndex = -1;
-    private String currentLine = "";
-    private Token oldLookaheadToken;
-    //    private enum State {PARSING, COMMENT, END_OF_FILE}
-    //    private Pattern rawTerm = Pattern.compile("\\s*(\\S+)");
-
-
-
     // Internal
     private BufferedReader reader;
-    private StringBuilder inputBuffer = new StringBuilder();
-    private StringBuilder tokenBuilder = new StringBuilder();
-    private boolean comment; //??
+    private final StringBuilder inputBuffer = new StringBuilder();
+    private final StringBuilder tokenBuilder = new StringBuilder();
 
     // Readable by user
     private Token currentToken = null;
     private Token lookaheadToken = null;
     private int lineCount = 0;
 
-    private Pattern charPattern = Pattern.compile("[{}()\\[\\].,;+\\-*\\/&|<>=~]");
+    private final Pattern charPattern = Pattern.compile("[{}()\\[\\].,;+\\-*\\/&|<>=~]");
 
     /**
      * Creates a Jack Tokenizer for a given input file.
@@ -47,8 +34,6 @@ public class JackTokenizer {
         try {
             FileReader fileReader = new FileReader(inputFile);
             reader = new BufferedReader(fileReader);
-//            generateTokens();
-//            adv();
             advance();
         } catch (IOException e) {
             e.printStackTrace();

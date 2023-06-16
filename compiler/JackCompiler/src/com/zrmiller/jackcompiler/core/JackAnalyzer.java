@@ -4,53 +4,59 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class JackAnalyzer {
 
-    public JackAnalyzer(String source) {
+    private final String source;
+    private final boolean xmlDebug;
+    private final boolean tokenDebug;
 
+    public JackAnalyzer(String source, boolean xmlDebug, boolean tokenDebug) {
+        this.source = source;
+        this.xmlDebug = xmlDebug;
+        this.tokenDebug = tokenDebug;
+    }
+
+    public void compile() {
         long time = System.currentTimeMillis();
-
-        final ArrayList<File> inputFiles = new ArrayList<>();
-        // Debug Flags
-        boolean debugTokenizer = false;
-
         System.out.println("Compiling \"" + source + "\"...");
+        final ArrayList<File> inputFiles = new ArrayList<>();
         File sourceFile = new File(source);
         if (!sourceFile.exists()) {
-            System.out.println("[Analyzer] ERROR : Invalid source");
-            return;
+            Main.terminateEarly("Invalid source file \"" + sourceFile + "\".");
         } else if (sourceFile.isFile()) {
+            if (!source.endsWith(".jack"))
+                Main.terminateEarly("Compilation target must be a .jack file or a directory containing .jack files.");
             inputFiles.add(sourceFile);
         } else if (sourceFile.isDirectory()) {
-            for (File f : sourceFile.listFiles()) {
+            for (File f : Objects.requireNonNull(sourceFile.listFiles())) {
                 if (f.getPath().endsWith(".jack")) {
                     inputFiles.add(f);
                 }
             }
+            if (inputFiles.size() == 0) Main.terminateEarly("Input directory contains no .jack files.");
         }
 
         //Compile each file
         for (File currentFile : inputFiles) {
-
             String fileName = currentFile.getName().replaceAll(".jack", "");
+            JackTokenizer tokenizer;
 
-            // Tokenizer Debugging
-            if (debugTokenizer) {
-                System.out.println("[Analyzer] [TOKENIZER DEBUG] - Generating tokens for " + currentFile.getPath() + "...");
+            // Tokenizer Debug compilation
+            if (tokenDebug) {
+                System.out.println("\tGenerating token XML for " + currentFile.getPath() + "...");
                 String tokenizerOutputPath = currentFile.getPath().replaceAll(currentFile.getName(), fileName + "Tokens.xml");
                 File tokenizerOutput = new File(tokenizerOutputPath);
-                JackTokenizer tokenizer = new JackTokenizer(currentFile);
+                tokenizer = new JackTokenizer(currentFile);
                 FileWriter fw;
                 try {
                     fw = new FileWriter(tokenizerOutput);
                     fw.write("<tokens>\n");
                     while (tokenizer.hasMoreTokens()) {
                         tokenizer.advance();
-//                        System.out.println("TOKEN ::: " + tokenizer.getCurrentToken().identifier());
                         fw.write(tokenizer.toXML() + "\n");
                     }
-                    System.out.println("[Analyzer] [TOKENIZER DEBUG] - Total line count: " + tokenizer.getLineCount());
                     fw.write("</tokens>\n");
                     fw.close();
                 } catch (IOException e) {
@@ -58,23 +64,20 @@ public class JackAnalyzer {
                 }
             }
 
-
-
             /*
-             *		COMPILATION ENGINE XML DEBUGGING
+             *	XML Debug Compilation
              */
 
-            //Start
-
-            String outPathXML = currentFile.getPath().replaceAll(currentFile.getName(), fileName + "CompiledXML.xml");
-            File outputXML = new File(outPathXML);
-
-            //Run
-            JackTokenizer tokenizer = new JackTokenizer(currentFile);
-//            CompilationEngine_XML engine = new CompilationEngine_XML(tokenizer, outputXML);
-//            engine.compileClass();
-//            engine.close();
-
+            if (xmlDebug) {
+                System.out.println("\tGenerating debug XML for \"" + currentFile.getPath() + "\".");
+                String outPathXML = currentFile.getPath().replaceAll(currentFile.getName(), fileName + "Compiled.xml");
+                File outputXML = new File(outPathXML);
+                //Run
+                tokenizer = new JackTokenizer(currentFile);
+                CompilationEngine_XML engine = new CompilationEngine_XML(tokenizer, outputXML);
+                engine.compileClass();
+                engine.close();
+            }
 
             /*
              *  Actual Compilation
@@ -86,12 +89,10 @@ public class JackAnalyzer {
             tokenizer = new JackTokenizer(currentFile);
             CompilationEngine compilationEngine = new CompilationEngine(tokenizer, output);
             compilationEngine.compileClass();
-
-
+            if ((xmlDebug || tokenDebug) && inputFiles.size() > 1) System.out.println("\t----------");
         }
         time = System.currentTimeMillis() - time;
-        System.out.println("Compiled successfully in  " + time + " milliseconds. ");
-
+        System.out.println("Compiled successfully in " + time + " milliseconds. ");
     }
 
 }
