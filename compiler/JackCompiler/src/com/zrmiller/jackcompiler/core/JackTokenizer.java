@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.regex.Pattern;
 
 public class JackTokenizer {
@@ -27,6 +26,7 @@ public class JackTokenizer {
 
     /**
      * Creates a Jack Tokenizer for a given input file.
+     *
      * @param inputFile The file to be parsed.
      */
 
@@ -61,21 +61,21 @@ public class JackTokenizer {
                 }
 
                 // String Handling
-                if(!parsingComment && character.equals("\"")){
-                    if(!parsingString && tokenBuilder.length()>0){
+                if (!parsingComment && character.equals("\"")) {
+                    if (!parsingString && tokenBuilder.length() > 0) {
                         setLookaheadToken(i);
                         continue;
                     }
-                    if(parsingString){
+                    if (parsingString) {
                         tokenBuilder.append(inputBuffer.charAt(i));
-                        setLookaheadToken(i+1);
+                        setLookaheadToken(i + 1);
                         return;
-                    }else{
+                    } else {
                         parsingString = true;
 //                        continue;
                     }
                 }
-                if(parsingString){
+                if (parsingString) {
                     tokenBuilder.append(inputBuffer.charAt(i));
                     continue;
                 }
@@ -103,22 +103,22 @@ public class JackTokenizer {
                         }
                     }
                 }
-                if(parsingComment){
+                if (parsingComment) {
                     continue;
                 }
 
                 // White Space Check
                 if (character.matches("\\s+")) {
-                    setLookaheadToken(i+1);
+                    setLookaheadToken(i + 1);
                 }
 
                 // Single Character Symbol Check
                 else if (charPattern.matcher(character).matches()) {
-                    if(tokenBuilder.length() > 0){
+                    if (tokenBuilder.length() > 0) {
                         setLookaheadToken(i);
-                    }else{
+                    } else {
                         tokenBuilder.append(inputBuffer.charAt(i));
-                        setLookaheadToken(i+1);
+                        setLookaheadToken(i + 1);
                     }
                 }
 
@@ -128,16 +128,16 @@ public class JackTokenizer {
                 }
 
                 // Return when a token is found
-                if(lookaheadToken != null){
+                if (lookaheadToken != null) {
                     return;
                 }
 
             }
 
             // End of Line Handling
-            if(tokenBuilder.length() == 0){
+            if (tokenBuilder.length() == 0) {
                 inputBuffer.setLength(0);
-            }else{
+            } else {
                 setLookaheadToken(inputBuffer.length());
             }
         }
@@ -151,10 +151,11 @@ public class JackTokenizer {
 
     /**
      * Fills the inputBuffer with text from the input file as needed. Returns false when the end of file has been reached.
+     *
      * @return
      */
     private boolean checkInputBuffer() {
-        if(inputBuffer.length() > 0){
+        if (inputBuffer.length() > 0) {
             return true;
         }
         try {
@@ -165,14 +166,13 @@ public class JackTokenizer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if(inputBuffer.length() > 0){
+        if (inputBuffer.length() > 0) {
             return true;
         }
         return false;
     }
 
     /**
-     *
      * @param spliceIndex The input buffer will be spliced to (spliceIndex, endingIndex) inclusive.
      * @return
      */
@@ -194,27 +194,27 @@ public class JackTokenizer {
         return currentToken.tokenType();
     }
 
-    public Keyword keyword(){
+    public Keyword keyword() {
         return currentToken.keyword();
     }
 
-    public char symbol(){
+    public char symbol() {
         return currentToken.symbol();
     }
 
-    public String identifier(){
+    public String identifier() {
         return currentToken.identifier();
     }
 
-    public int intValue(){
+    public int intValue() {
         return currentToken.intVal();
     }
 
-    public String stringValue(){
+    public String stringValue() {
         return currentToken.identifier();
     }
 
-    public int getLineCount(){
+    public int getLineCount() {
         return this.lineCount;
     }
 
@@ -222,7 +222,7 @@ public class JackTokenizer {
         return currentToken.toXML();
     }
 
-    public Token getLookaheadToken(){
+    public Token getLookaheadToken() {
         return lookaheadToken;
     }
 

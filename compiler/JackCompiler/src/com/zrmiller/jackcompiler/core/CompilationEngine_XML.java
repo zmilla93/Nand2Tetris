@@ -79,17 +79,17 @@ public class CompilationEngine_XML {
     private void compileClassVarDec() {
         this.openTag("classVarDec");
         // Kind
-        if(checkKeyword(false, false, classVarDecKeywords)){
+        if (checkKeyword(false, false, classVarDecKeywords)) {
             latestKind = kindFromString(tokenizer.identifier());
             advance();
         }
         // Type
-        if (checkKeyword(true, false, types)){
+        if (checkKeyword(true, false, types)) {
             latestType = tokenizer.identifier();
             advance();
         }
         // varName
-        if(checkToken(false, TokenType.IDENTIFIER)){
+        if (checkToken(false, TokenType.IDENTIFIER)) {
             latestName = tokenizer.identifier();
             advance();
         }
@@ -97,7 +97,7 @@ public class CompilationEngine_XML {
         // Optional Additional Terms
         while (checkSymbol(false, ',')) {
             advance();
-            if(checkToken(false, TokenType.IDENTIFIER)){
+            if (checkToken(false, TokenType.IDENTIFIER)) {
                 latestName = tokenizer.identifier();
                 symbolTable.define(latestName, latestType, latestKind);
                 advance();
@@ -147,18 +147,18 @@ public class CompilationEngine_XML {
 //            checkKeyword(true, types);
             latestType = tokenizer.identifier();
             advance();
-            if(checkToken(false, TokenType.IDENTIFIER)){
+            if (checkToken(false, TokenType.IDENTIFIER)) {
                 latestName = tokenizer.identifier();
                 advance();
             }
             symbolTable.define(latestName, latestType, latestKind);
             while (checkSymbol(false, ',')) {
                 checkSymbol(',');
-                if(checkKeyword(true, false, types)){
+                if (checkKeyword(true, false, types)) {
                     latestType = tokenizer.identifier();
                     advance();
                 }
-                if(checkToken(false, TokenType.IDENTIFIER)){
+                if (checkToken(false, TokenType.IDENTIFIER)) {
                     latestName = tokenizer.identifier();
                     advance();
                 }
@@ -185,18 +185,18 @@ public class CompilationEngine_XML {
         openTag("varDec");
         checkKeyword(Keyword.VAR);
         latestKind = SymbolKind.VAR;
-        if(checkKeyword(true,false, types)){
+        if (checkKeyword(true, false, types)) {
             latestType = tokenizer.identifier();
             advance();
         }
-        if(checkToken(false, TokenType.IDENTIFIER)){
+        if (checkToken(false, TokenType.IDENTIFIER)) {
             latestName = tokenizer.identifier();
             advance();
         }
         symbolTable.define(latestName, latestType, latestKind);
         while (checkSymbol(false, ',')) {
             checkSymbol(',');
-            if(checkToken(false, TokenType.IDENTIFIER)){
+            if (checkToken(false, TokenType.IDENTIFIER)) {
                 latestName = tokenizer.identifier();
                 advance();
             }
@@ -324,16 +324,14 @@ public class CompilationEngine_XML {
             advance();
         }
         //  '(' expression ')'
-        else if(checkSymbol(false, '(')){
+        else if (checkSymbol(false, '(')) {
             advance();
             compileExpression();
             checkSymbol(')');
-        }
-        else if (checkToken(false, termTokens) || checkKeyword(false, false, termKeywords)) {
+        } else if (checkToken(false, termTokens) || checkKeyword(false, false, termKeywords)) {
 //            if(checkSymbol(false, '['))
             advance();
-        }
-        else if(checkSymbol(false, unaryOp)){
+        } else if (checkSymbol(false, unaryOp)) {
             advance();
             compileTerm();
         }
@@ -342,17 +340,15 @@ public class CompilationEngine_XML {
 //            ArrayList<String> buffer = tokenizer.getInputBuffer();
             Token lookaheadToken = tokenizer.getLookaheadToken();
             if (lookaheadToken != null) {
-                if(lookaheadToken.tokenType() == TokenType.SYMBOL){
-                    if(lookaheadToken.symbol() == '(' || lookaheadToken.symbol() == '.'){
+                if (lookaheadToken.tokenType() == TokenType.SYMBOL) {
+                    if (lookaheadToken.symbol() == '(' || lookaheadToken.symbol() == '.') {
                         compileSubroutineCall();
-                    }
-                    else if(lookaheadToken.symbol() == '['){
+                    } else if (lookaheadToken.symbol() == '[') {
                         checkToken(TokenType.IDENTIFIER);
                         advance();
                         compileExpression();
                         checkSymbol(']');
-                    }
-                    else{
+                    } else {
 //                        advance();
                         checkToken(TokenType.IDENTIFIER);
                     }
@@ -396,7 +392,7 @@ public class CompilationEngine_XML {
         boolean result = false;
         for (TokenType t : tokenType) {
             if (t == tokenizer.tokenType()) {
-                if(t == TokenType.IDENTIFIER && advance){
+                if (t == TokenType.IDENTIFIER && advance) {
 //                    System.out.println("IDENTIFIER : " + tokenizer.currentTerm);
 //                    System.out.println(tokenizer.toXML());
                 }
@@ -472,10 +468,10 @@ public class CompilationEngine_XML {
         return result;
     }
 
-    private SymbolKind kindFromString(String s){
+    private SymbolKind kindFromString(String s) {
         String lower = s.toLowerCase();
-        for(SymbolKind k : SymbolKind.values()){
-            if(lower.equals(k.toString().toLowerCase())){
+        for (SymbolKind k : SymbolKind.values()) {
+            if (lower.equals(k.toString().toLowerCase())) {
                 return k;
             }
         }

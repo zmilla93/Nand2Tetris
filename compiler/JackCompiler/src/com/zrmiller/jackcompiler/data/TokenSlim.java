@@ -8,32 +8,32 @@ public class TokenSlim {
     private TokenType type;
     private String value;
 
-    public TokenSlim(String value){
+    public TokenSlim(String value) {
 
     }
 
-    public TokenSlim(TokenType type, String value){
+    public TokenSlim(TokenType type, String value) {
         this.type = type;
         this.value = value;
     }
 
-    public TokenType type(){
+    public TokenType type() {
         return type;
     }
 
-    public String stringValue(){
+    public String stringValue() {
         return value;
     }
 
-    public Keyword keyword(){
+    public Keyword keyword() {
         return Keyword.valueOf(value.toUpperCase());
     }
 
-    public char symbol(){
+    public char symbol() {
         return value.charAt(0);
     }
 
-    public int intValue(){
+    public int intValue() {
         return Integer.valueOf(value);
     }
 

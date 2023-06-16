@@ -7,12 +7,12 @@ public enum Segment {
 
     private String name;
 
-    Segment(String name){
+    Segment(String name) {
         this.name = name;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return this.name;
     }
 

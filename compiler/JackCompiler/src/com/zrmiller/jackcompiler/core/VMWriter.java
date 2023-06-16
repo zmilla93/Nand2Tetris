@@ -11,7 +11,7 @@ public class VMWriter {
 
     FileWriter fw;
 
-    public VMWriter(File outputFile){
+    public VMWriter(File outputFile) {
         try {
             fw = new FileWriter(outputFile);
         } catch (IOException e) {
@@ -19,43 +19,43 @@ public class VMWriter {
         }
     }
 
-    public void writePush(Segment segment, int index){
+    public void writePush(Segment segment, int index) {
         write("push " + segment + " " + index);
     }
 
-    public void writePop(Segment segment, int index){
+    public void writePop(Segment segment, int index) {
         write("pop " + segment + " " + index);
     }
 
-    public void writeArithmetic(Command command){
+    public void writeArithmetic(Command command) {
         write(command.toString());
     }
 
-    public void writeLabel(String label){
-        write("label " + label );
+    public void writeLabel(String label) {
+        write("label " + label);
     }
 
-    public void writeGoto(String label){
+    public void writeGoto(String label) {
         write("goto " + label);
     }
 
-    public void writeIf(String label){
+    public void writeIf(String label) {
         write("if-goto " + label);
     }
 
-    public void writeCall(String name, int argCount){
+    public void writeCall(String name, int argCount) {
         write("call " + name + " " + argCount);
     }
 
-    public void writeFunction(String name, int localCount){
+    public void writeFunction(String name, int localCount) {
         write("function " + name + " " + localCount);
     }
 
-    public void writeReturn(){
+    public void writeReturn() {
         write("return");
     }
 
-    protected void close(){
+    protected void close() {
         try {
             fw.close();
         } catch (IOException e) {
@@ -63,7 +63,7 @@ public class VMWriter {
         }
     }
 
-    private void write(String s){
+    private void write(String s) {
         try {
             fw.write(s + "\n");
         } catch (IOException e) {

@@ -1,4 +1,5 @@
 package com.zrmiller.jackcompiler.data;
+
 import com.zrmiller.jackcompiler.enums.Keyword;
 import com.zrmiller.jackcompiler.enums.TokenType;
 
@@ -19,7 +20,7 @@ public class Token {
 
     public Token(String input) {
         this.term = input;
-        if(patChar.matcher(input).matches()){
+        if (patChar.matcher(input).matches()) {
             this.tokenType = TokenType.SYMBOL;
             this.symbol = input.charAt(0);
             return;
@@ -31,43 +32,43 @@ public class Token {
                 return;
             }
         }
-        if(patConst.matcher(input).matches()){
+        if (patConst.matcher(input).matches()) {
             this.tokenType = TokenType.INT_CONST;
             return;
         }
-        if(patString.matcher(input).matches()){
-            term = term.substring(1, term.length()-1);
+        if (patString.matcher(input).matches()) {
+            term = term.substring(1, term.length() - 1);
             this.tokenType = TokenType.STRING_CONST;
             return;
         }
-        if(patIdentifier.matcher(input).matches()){
+        if (patIdentifier.matcher(input).matches()) {
             this.tokenType = TokenType.IDENTIFIER;
             return;
         }
         this.tokenType = TokenType.UNKNOWN;
     }
 
-    public TokenType tokenType(){
+    public TokenType tokenType() {
         return this.tokenType;
     }
 
-    public Keyword keyword(){
+    public Keyword keyword() {
         return this.keyword;
     }
 
-    public char symbol(){
+    public char symbol() {
         return this.symbol;
     }
 
-    public String identifier(){
+    public String identifier() {
         return this.term;
     }
 
-    public int intVal(){
+    public int intVal() {
         return Integer.parseInt(this.term);
     }
 
-    public String toXML(){
+    public String toXML() {
         String text = term;
         if (text.length() == 1) {
             switch (text) {

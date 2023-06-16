@@ -6,7 +6,7 @@ public enum Command {
 
 
     @Override
-    public String toString(){
+    public String toString() {
         return this.name().toLowerCase();
     }
 

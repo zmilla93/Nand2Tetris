@@ -18,16 +18,16 @@ public class SymbolTable {
 
 //    String[] types = {"String", "int", "boolean"};
 
-    public void startSubroutine(){
+    public void startSubroutine() {
         argCount = 0;
         varCount = 0;
         subroutineHash = new HashMap<>();
     }
 
-    public void define(String name, String type, SymbolKind kind){
+    public void define(String name, String type, SymbolKind kind) {
 //        System.out.println("\t+SYMBOL\t(" + type + ") \t\t" + name + "\t\t" + kind);
         int index = varCount(kind);
-        switch(kind){
+        switch (kind) {
             case STATIC:
                 staticCount++;
                 classHash.put(name, new SymbolData(type, kind, index));
@@ -47,8 +47,8 @@ public class SymbolTable {
         }
     }
 
-    public int varCount(SymbolKind kind){
-        switch (kind){
+    public int varCount(SymbolKind kind) {
+        switch (kind) {
             case STATIC:
                 return staticCount;
             case FIELD:
@@ -63,40 +63,40 @@ public class SymbolTable {
 
     public SymbolKind kindOf(String name) {
         for (Map.Entry<String, SymbolData> entry : subroutineHash.entrySet()) {
-            if(entry.getKey().equals(name)){
+            if (entry.getKey().equals(name)) {
                 return entry.getValue().kind;
             }
         }
         for (Map.Entry<String, SymbolData> entry : classHash.entrySet()) {
-            if(entry.getKey().equals(name)){
+            if (entry.getKey().equals(name)) {
                 return entry.getValue().kind;
             }
         }
         return null;
     }
 
-    public String typeOf(String name){
+    public String typeOf(String name) {
         for (Map.Entry<String, SymbolData> entry : subroutineHash.entrySet()) {
-            if(entry.getKey().equals(name)){
+            if (entry.getKey().equals(name)) {
                 return entry.getValue().type;
             }
         }
         for (Map.Entry<String, SymbolData> entry : classHash.entrySet()) {
-            if(entry.getKey().equals(name)){
+            if (entry.getKey().equals(name)) {
                 return entry.getValue().type;
             }
         }
         return null;
     }
 
-    public int indexOf(String name){
+    public int indexOf(String name) {
         for (Map.Entry<String, SymbolData> entry : subroutineHash.entrySet()) {
-            if(entry.getKey().equals(name)){
+            if (entry.getKey().equals(name)) {
                 return entry.getValue().index;
             }
         }
         for (Map.Entry<String, SymbolData> entry : classHash.entrySet()) {
-            if(entry.getKey().equals(name)){
+            if (entry.getKey().equals(name)) {
                 return entry.getValue().index;
             }
         }
