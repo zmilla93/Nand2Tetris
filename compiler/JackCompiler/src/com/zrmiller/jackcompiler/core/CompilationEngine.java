@@ -4,20 +4,17 @@ import com.zrmiller.jackcompiler.data.Token;
 import com.zrmiller.jackcompiler.enums.*;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class CompilationEngine {
 
     //File stuff
-    private String fileName;
-    private JackTokenizer tokenizer;
-    private FileWriter fw;
-    private int indent = 0;
-    private int loggerIndent = 2;
-    private int loggerWidth = 15;
+    private final String fileName;
+    private final JackTokenizer tokenizer;
+    //    private int indent = 0;
+    private static final int loggerIndent = 2;
+    private static final int loggerWidth = 15;
 
     //Keyword, token, and char groups
     private final Keyword[] types = {Keyword.INT, Keyword.CHAR, Keyword.BOOLEAN};
@@ -25,33 +22,25 @@ public class CompilationEngine {
     private final Keyword[] subroutineKeywords = {Keyword.CONSTRUCTOR, Keyword.FUNCTION, Keyword.METHOD};
     private final Keyword[] classVarDecKeywords = {Keyword.STATIC, Keyword.FIELD};
     private final Keyword[] termKeywords = {Keyword.TRUE, Keyword.FALSE, Keyword.NULL, Keyword.THIS};
-    //    private final TokenType[] termTokens = {TokenType.INT_CONST, TokenType.STRING_CONST};
     private final char[] unaryOp = {'-', '~'};
     private final char[] op = {'+', '-', '*', '/', '&', '|', '<', '>', '='};
 
     //Stuff for symbol table
 //    private String if
-    private final String WHILE_EXP = "WHILE_EXP";
-    private final String WHILE_END = "WHILE_END";
-    private final String IF_TRUE = "IF_TRUE";
-    private final String IF_FALSE = "IF_FALSE";
-    private final String IF_END = "IF_END";
-    // TODO : Move 'latest' variables to local scope
-    private SymbolTable symbolTable = new SymbolTable();
+    private static final String WHILE_EXP = "WHILE_EXP";
+    private static final String WHILE_END = "WHILE_END";
+    private static final String IF_TRUE = "IF_TRUE";
+    private static final String IF_FALSE = "IF_FALSE";
+    private static final String IF_END = "IF_END";
+    private final SymbolTable symbolTable = new SymbolTable();
     private String latestName;
     private String latestType;
     private SymbolKind latestKind;
     private boolean insideMethod = false;
 
     //VM Output
-    private VMWriter vmWriter;
-    //    private int argCount;
+    private final VMWriter vmWriter;
     private String className;
-    private String latestSubroutineKind;
-    private String latestSubroutineType;
-    private String latestSubroutine;
-    private String latestCall;
-    private String latestDo;
     private ArrayList<String> latestExpression = new ArrayList<>();
     private ArrayList<String> callList = new ArrayList<>();
 
@@ -71,7 +60,6 @@ public class CompilationEngine {
 
     //  'class' className '{' classVarDec* subroutineDec* '}'
     public void compileClass() {
-        openTag("class");
         checkKeyword(Keyword.CLASS);
         if (checkToken(false, TokenType.IDENTIFIER)) {
             className = tokenizer.identifier();
@@ -92,13 +80,11 @@ public class CompilationEngine {
             compileSubroutineDec(fieldCount);
         }
         checkSymbol('}');
-        closeTag("class");
         vmWriter.close();
     }
 
     //  ('static', 'field') type varName (',' varName)* '}'
     private int compileClassVarDec() {
-        this.openTag("classVarDec");
         int count = 0;
         // Kind
         if (checkKeyword(false, false, classVarDecKeywords)) {
@@ -131,7 +117,6 @@ public class CompilationEngine {
             }
         }
         checkSymbol(';');
-        this.closeTag("classVarDec");
         return count;
     }
 
@@ -141,17 +126,14 @@ public class CompilationEngine {
         symbolTable.startSubroutine();
         ifCount = 0;
         whileCount = 0;
-        openTag("subroutineDec");
         String subroutineName = null;
         Keyword keyword = tokenizer.keyword();
 //        CONSTRUCTOR, FUNCTION, METHOD
         if (!(keyword == Keyword.CONSTRUCTOR)) fieldCount = 0;
         if (checkKeyword(false, false, subroutineKeywords)) {
-            latestSubroutineKind = tokenizer.identifier();
             advance();
         }
         if (checkKeyword(true, false, keywordList(types, Keyword.VOID))) {
-            latestSubroutineType = tokenizer.identifier();
             advance();
         }
         if (checkToken(false, TokenType.IDENTIFIER)) {
@@ -162,7 +144,6 @@ public class CompilationEngine {
         compileParameterList();
         checkSymbol(')');
         compileSubroutineBody(keyword, subroutineName, fieldCount);
-        closeTag("subroutineDec");
 
     }
 
@@ -209,8 +190,6 @@ public class CompilationEngine {
 
     //  ((type varName) (',' type varName)*)?
     private void compileParameterList() {
-        // TODO : check if this count is ever used
-        this.openTag("parameterList");
         latestKind = SymbolKind.ARG;
         if (checkKeyword(true, false, types)) {
             latestType = tokenizer.identifier();
@@ -233,13 +212,11 @@ public class CompilationEngine {
                 symbolTable.define(latestName, latestType, latestKind);
             }
         }
-        this.closeTag("parameterList");
     }
 
     // TODO : Reduced passed info as much as possible!!!
     //  '{' varDec* statements '}'
     private int compileSubroutineBody(Keyword keyword, String subroutineName, int fieldCount) {
-        this.openTag("subroutineBody");
         checkSymbol('{');
         int varCount = 0;
         while (checkKeyword(false, false, Keyword.VAR)) {
@@ -258,13 +235,11 @@ public class CompilationEngine {
         compileStatements();
         insideMethod = false;
         checkSymbol('}');
-        this.closeTag("subroutineBody");
         return varCount;
     }
 
     //  'var' type varName (',' varName)* ;
     private int compileVarDec() {
-        openTag("varDec");
         int count = 0;
         checkKeyword(Keyword.VAR);
         latestKind = SymbolKind.VAR;
@@ -288,13 +263,11 @@ public class CompilationEngine {
             symbolTable.define(latestName, latestType, latestKind);
         }
         checkSymbol(';');
-        closeTag("varDec");
         return count;
     }
 
     // statement*
     private void compileStatements() {
-        openTag("statements");
         while (checkKeyword(false, false, statement)) {
             if (tokenizer.keyword() == Keyword.LET) {
                 compileLet();
@@ -308,21 +281,17 @@ public class CompilationEngine {
                 compileReturn();
             }
         }
-        closeTag("statements");
     }
 
     private void compileDo() {
-        openTag("doStatement");
         checkKeyword(false, Keyword.DO);
         compileSubroutineCall();
         checkSymbol(';');
-        closeTag("doStatement");
         vmWriter.writePop(Segment.TEMP, 0);
     }
 
     //  'let' varName ('[' expression ']')? '=' expression ';'
     private void compileLet() {
-        openTag("letStatement");
         checkKeyword(Keyword.LET);
         // varName
         String name = tokenizer.identifier();
@@ -350,11 +319,9 @@ public class CompilationEngine {
         } else {
             vmWriter.writePop(seg, index);
         }
-        closeTag("letStatement");
     }
 
     private void compileWhile() {
-        openTag("whileStatement");
         int index = whileCount;
         whileCount++;
         advance();
@@ -369,11 +336,9 @@ public class CompilationEngine {
         checkSymbol('}');
         vmWriter.writeGoto(WHILE_EXP + index);
         vmWriter.writeLabel(WHILE_END + index);
-        closeTag("whileStatement");
     }
 
     private void compileReturn() {
-        openTag("returnStatement");
         advance();
         if (checkSymbol(false, ';')) {
             checkSymbol(';');
@@ -383,13 +348,11 @@ public class CompilationEngine {
             checkSymbol(';');
         }
         vmWriter.writeReturn();
-        closeTag("returnStatement");
     }
 
     private void compileIf() {
         int index = ifCount;
         ifCount++;
-        openTag("ifStatement");
         advance();
         checkSymbol('(');
         compileExpression();
@@ -412,13 +375,11 @@ public class CompilationEngine {
             checkSymbol('}');
             vmWriter.writeLabel(IF_END + index);
         }
-        closeTag("ifStatement");
     }
 
 
     private int compileExpressionList() {
         int count = 0;
-        openTag("expressionList");
         if (!checkSymbol(false, ')')) {
             compileExpression();
             count++;
@@ -428,13 +389,11 @@ public class CompilationEngine {
             compileExpression();
             count++;
         }
-        closeTag("expressionList");
         return count;
     }
 
     //  term (op term)*
     private void compileExpression() {
-        openTag("expression");
         compileTerm();
         // term op term
         while (tokenizer.tokenType() == TokenType.SYMBOL && isOp(tokenizer.identifier().charAt(0))) {
@@ -471,13 +430,10 @@ public class CompilationEngine {
                     break;
             }
         }
-        closeTag("expression");
     }
 
     //  integerConstant | stringConstant | keywordConstant | varName | varName '[' expression ']' | subroutineCall | '(' expression ')' | UnaryOp term
     private void compileTerm() {
-        openTag("term");
-        // TODO : finish expression handling
         // Unary OP
         char op = tokenizer.identifier().charAt(0);
         if (isUnaryOp(op)) {
@@ -566,8 +522,6 @@ public class CompilationEngine {
                 }
             }
         }
-        closeTag("term");
-
     }
 
 
@@ -740,22 +694,6 @@ public class CompilationEngine {
         return false;
     }
 
-    private void write(String s) {
-        try {
-            fw.write(s + "\n");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void openTag(String text) {
-        indent++;
-    }
-
-    private void closeTag(String text) {
-        indent--;
-    }
-
     private void log(String... strings) {
         StringBuilder out = new StringBuilder();
         for (int i = 0; i < loggerIndent; i++) {
@@ -776,13 +714,7 @@ public class CompilationEngine {
     }
 
     private void halt(String expectedType, String expectedValue) {
-        if (fw != null) {
-            try {
-                fw.close();
-            } catch (IOException e) {
-                log("[PARSER]", "Error closing file...");
-            }
-        }
+        vmWriter.close();
         boolean first = true;
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (int i = stackTrace.length - 1; i >= 0; i--) {
@@ -801,12 +733,6 @@ public class CompilationEngine {
     }
 
     private void error(String message) {
-        if (fw != null) {
-            try {
-                fw.close();
-            } catch (IOException e) {
-            }
-        }
         //TODO : Fix line counter
         System.err.println("[ERROR] In " + fileName + ".jack (Line " + tokenizer.getLineCount() + ") : " + message);
         vmWriter.close();
@@ -822,12 +748,7 @@ public class CompilationEngine {
     }
 
     private void error(String exceptedType, String expectedValue) {
-        if (fw != null) {
-            try {
-                fw.close();
-            } catch (IOException e) {
-            }
-        }
+        vmWriter.close();
         //TODO : Fix line counter
         System.err.println("[ERROR] In " + fileName + ".jack (Line " + tokenizer.getLineCount() + ") at token '" + tokenizer.identifier() + "' : " + "Excepted " + exceptedType + " " + expectedValue);
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();

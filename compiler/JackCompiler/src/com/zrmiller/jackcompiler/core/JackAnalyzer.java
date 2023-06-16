@@ -42,7 +42,6 @@ public class JackAnalyzer {
         for (File currentFile : inputFiles) {
             String fileName = currentFile.getName().replaceAll(".jack", "");
             JackTokenizer tokenizer;
-
             // Tokenizer Debug compilation
             if (tokenDebug) {
                 System.out.println("\tGenerating token XML for " + currentFile.getPath() + "...");
@@ -74,7 +73,7 @@ public class JackAnalyzer {
                 File outputXML = new File(outPathXML);
                 //Run
                 tokenizer = new JackTokenizer(currentFile);
-                CompilationEngine_XML engine = new CompilationEngine_XML(tokenizer, outputXML);
+                CompilationEngineXML engine = new CompilationEngineXML(tokenizer, outputXML);
                 engine.compileClass();
                 engine.close();
             }

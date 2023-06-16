@@ -16,10 +16,10 @@ import java.util.Arrays;
  * Refer to 'CompilationEngine.java' to see the full compilation process.
  */
 
-public class CompilationEngine_XML {
+public class CompilationEngineXML {
 
     //File stuff
-    private JackTokenizer tokenizer;
+    private final JackTokenizer tokenizer;
     private FileWriter fw;
     private int indent = 0;
 
@@ -34,12 +34,12 @@ public class CompilationEngine_XML {
     private final char[] op = {'+', '-', '*', '/', '&', '|', '<', '>', '='};
 
     //Stuff for symbol table
-    private SymbolTable symbolTable = new SymbolTable();
+    private final SymbolTable symbolTable = new SymbolTable();
     private String latestName;
     private String latestType;
     private SymbolKind latestKind;
 
-    public CompilationEngine_XML(JackTokenizer tokenizer, File output) {
+    public CompilationEngineXML(JackTokenizer tokenizer, File output) {
         this.tokenizer = tokenizer;
         try {
             fw = new FileWriter(output);
