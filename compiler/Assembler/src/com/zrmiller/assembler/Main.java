@@ -81,7 +81,8 @@ public class Main {
                     String debugD = p.dest() != null ? p.dest() : "NULL";
                     String debugC = p.comp() != null ? p.comp() : "NULL";
                     String debugJ = p.jump() != null ? p.jump() : "NULL";
-                    String[] debugArr = {"(" + p.lineCount() + ")", p.rawText(), p.commandType().toString(), debugD, debugC, debugJ};
+                    String lineCount = p.commandType() == CommandType.L ? "--" : Integer.toString(p.lineCount());
+                    String[] debugArr = {"(" + lineCount + ")", p.rawText(), p.commandType().toString(), debugD, debugC, debugJ};
                     System.out.println(getFormattedLine(debugArr));
                 }
                 switch (p.commandType()) {
