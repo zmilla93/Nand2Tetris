@@ -94,7 +94,7 @@ public class Main {
         code.close();
         System.out.println("Output written to \"" + fileOutString + "\".");
         time = System.currentTimeMillis() - time;
-        System.out.println("Virtual machine finished in " + time + " milliseconds.");
+        System.out.println("Virtual machine finished successfully in " + time + " milliseconds.");
     }
 
     private static String debugText(String[] text) {

@@ -34,7 +34,7 @@ public class Parser {
 
     public void advance() {
         try {
-            //Removes end of line comments and standardized all white spaces
+            // Removes end of line comments and standardized all white spaces
             curLine = br.readLine().replaceAll("\\/\\/.*", "").replaceAll("(\\A\\s+|\\s+\\z)", "").replaceAll("\\s+", " ");
             curLineArray = curLine.split("[ ]+");
         } catch (IOException e) {
