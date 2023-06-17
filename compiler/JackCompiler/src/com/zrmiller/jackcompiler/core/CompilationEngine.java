@@ -4,7 +4,6 @@ import com.zrmiller.jackcompiler.data.Token;
 import com.zrmiller.jackcompiler.enums.*;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 
 public class CompilationEngine {
@@ -12,9 +11,7 @@ public class CompilationEngine {
     //File stuff
     private final String fileName;
     private final JackTokenizer tokenizer;
-    //    private int indent = 0;
-    private static final int loggerIndent = 2;
-    private static final int loggerWidth = 15;
+    private boolean stackTrace = false;
 
     //Keyword, token, and char groups
     private final Keyword[] types = {Keyword.INT, Keyword.CHAR, Keyword.BOOLEAN};
@@ -26,7 +23,6 @@ public class CompilationEngine {
     private final char[] op = {'+', '-', '*', '/', '&', '|', '<', '>', '='};
 
     //Stuff for symbol table
-//    private String if
     private static final String WHILE_EXP = "WHILE_EXP";
     private static final String WHILE_END = "WHILE_END";
     private static final String IF_TRUE = "IF_TRUE";
@@ -41,17 +37,16 @@ public class CompilationEngine {
     //VM Output
     private final VMWriter vmWriter;
     private String className;
-    private ArrayList<String> latestExpression = new ArrayList<>();
-    private ArrayList<String> callList = new ArrayList<>();
 
     private int ifCount = 0;
     private int whileCount = 0;
 
     //TODO : Should add more accurate expectation when advance() is used
 
-    public CompilationEngine(JackTokenizer tokenizer, File output) {
+    public CompilationEngine(JackTokenizer tokenizer, File output, boolean stackTrace) {
         fileName = output.getName().replaceAll("\\.vm\\Z", "");
         this.tokenizer = tokenizer;
+        this.stackTrace = stackTrace;
         if (tokenizer.hasMoreTokens()) {
             tokenizer.advance();
         }
@@ -449,7 +444,6 @@ public class CompilationEngine {
         else if (tokenizer.tokenType() == TokenType.INT_CONST) {
             vmWriter.writePush(Segment.CONST, tokenizer.intValue());
             advance();
-            return;
         }
         // TRUE, FALSE, NULL, THIS
         else if (checkKeyword(false, false, termKeywords)) {
@@ -567,7 +561,7 @@ public class CompilationEngine {
             }
         }
         if (!result && advance) {
-            halt("TOKEN", Arrays.toString(tokenType));
+            error("Token", Arrays.toString(tokenType));
         }
         if (advance && result) {
             advance();
@@ -596,7 +590,6 @@ public class CompilationEngine {
             }
         }
         if (!result && advance) {
-//            halt(TokenType.SYMBOL.toString(), Arrays.toString(symbols));
             error(TokenType.SYMBOL.toString(), symbols);
         }
         return result;
@@ -624,7 +617,6 @@ public class CompilationEngine {
         }
         if (advance && !result) {
             error(TokenType.KEYWORD.toString(), Arrays.toString(expectedKeywords));
-//            halt(TokenType.KEYWORD.toString(), Arrays.toString(expectedKeywords));
         }
         return result;
     }
@@ -651,8 +643,8 @@ public class CompilationEngine {
         if (result && advance) {
             advance();
         }
-        if (result == false && advance) {
-            halt(TokenType.KEYWORD.toString(), Arrays.toString(expectedKeywords));
+        if (!result && advance) {
+            error(TokenType.KEYWORD.toString(), Arrays.toString(expectedKeywords));
         }
         return result;
     }
@@ -694,75 +686,37 @@ public class CompilationEngine {
         return false;
     }
 
-    private void log(String... strings) {
-        StringBuilder out = new StringBuilder();
-        for (int i = 0; i < loggerIndent; i++) {
-            out.append(" ");
-        }
-        for (String s : strings) {
-            int len = s.length();
-            out.append(s);
-            for (int i = 0; i < loggerWidth - len; i++) {
-                out.append(" ");
-            }
-        }
-        System.out.println("[LOG] " + out.toString());
-    }
-
-    private void halt() {
-        halt(null, null);
-    }
-
-    private void halt(String expectedType, String expectedValue) {
-        vmWriter.close();
-        boolean first = true;
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        for (int i = stackTrace.length - 1; i >= 0; i--) {
-            if (first) {
-                log("[STACK TRACE]", stackTrace[i].toString());
-                first = false;
-            } else {
-                log("", stackTrace[i].toString());
-            }
-        }
-        //TODO : fix line counter
-//        log("[PARSER]", "Exception on line " + tokenizer.getLineCount() + " at token '" + tokenizer.currentTerm + "'");
-        log("", "Expected " + expectedType + " " + expectedValue);
-        vmWriter.close();
-        System.exit(1);
-    }
-
     private void error(String message) {
-        //TODO : Fix line counter
-        System.err.println("[ERROR] In " + fileName + ".jack (Line " + tokenizer.getLineCount() + ") : " + message);
-        vmWriter.close();
-        System.exit(1);
+        System.err.println("Error in " + fileName + ".jack (Line " + tokenizer.getLineCount() + ") : " + message);
+        abortCompilation();
     }
 
     private void error(String exceptedType, char[] expectedValue) {
-        if (expectedValue.length == 1) {
-            error(exceptedType, "'" + Character.toString(expectedValue[0]) + "'");
-        } else {
+        if (expectedValue.length == 1)
+            error(exceptedType, "'" + expectedValue[0] + "'");
+        else
             error(exceptedType, Arrays.toString(expectedValue));
-        }
+        abortCompilation();
     }
 
     private void error(String exceptedType, String expectedValue) {
         vmWriter.close();
-        //TODO : Fix line counter
-        System.err.println("[ERROR] In " + fileName + ".jack (Line " + tokenizer.getLineCount() + ") at token '" + tokenizer.identifier() + "' : " + "Excepted " + exceptedType + " " + expectedValue);
-        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        boolean first = true;
-        for (int i = stackTrace.length - 1; i >= 0; i--) {
-            if (first) {
-                log("[STACK TRACE]", stackTrace[i].toString());
-                first = false;
-            } else {
-                log("", stackTrace[i].toString());
-            }
-        }
+        System.err.println("Error in " + fileName + ".jack (Line " + tokenizer.getLineCount() + ") at token '" + tokenizer.identifier() + "' : " + "Excepted " + exceptedType + " " + expectedValue);
+        abortCompilation();
+    }
+
+    private void abortCompilation() {
+        if (stackTrace) printStackTrace();
         vmWriter.close();
+        System.out.println("Compiler terminated.");
         System.exit(1);
+    }
+
+    private void printStackTrace() {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        for (StackTraceElement e : stackTrace) {
+            System.out.println("[STACK TRACE]\t" + e);
+        }
     }
 
 }

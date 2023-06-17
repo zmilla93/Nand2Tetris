@@ -11,11 +11,13 @@ public class JackAnalyzer {
     private final String source;
     private final boolean xmlDebug;
     private final boolean tokenDebug;
+    private final boolean stackTrace;
 
-    public JackAnalyzer(String source, boolean xmlDebug, boolean tokenDebug) {
+    public JackAnalyzer(String source, boolean xmlDebug, boolean tokenDebug, boolean stackTrace) {
         this.source = source;
         this.xmlDebug = xmlDebug;
         this.tokenDebug = tokenDebug;
+        this.stackTrace = stackTrace;
     }
 
     public void compile() {
@@ -86,7 +88,7 @@ public class JackAnalyzer {
             String outPath = currentFile.getPath().replaceAll(currentFile.getName(), fileName + ".vm");
             File output = new File(outPath);
             tokenizer = new JackTokenizer(currentFile);
-            CompilationEngine compilationEngine = new CompilationEngine(tokenizer, output);
+            CompilationEngine compilationEngine = new CompilationEngine(tokenizer, output, stackTrace);
             compilationEngine.compileClass();
             if ((xmlDebug || tokenDebug) && inputFiles.size() > 1) System.out.println("\t----------");
         }

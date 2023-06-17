@@ -8,11 +8,13 @@ public class Main {
         String directory = args[0];
         boolean xmlDebug = false;
         boolean tokenDebug = false;
+        boolean stackTrace = false;
         for (String s : args) {
             if (s.equals("-xml")) xmlDebug = true;
             if (s.equals("-tokens")) tokenDebug = true;
+            if (s.equals("-stacktrace")) stackTrace = true;
         }
-        JackAnalyzer analyzer = new JackAnalyzer(directory, xmlDebug, tokenDebug);
+        JackAnalyzer analyzer = new JackAnalyzer(directory, xmlDebug, tokenDebug, stackTrace);
         analyzer.compile();
     }
 
