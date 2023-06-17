@@ -107,7 +107,7 @@ public class CompilationEngineXML {
         this.closeTag("classVarDec");
     }
 
-    //  (CONSTRUCTOR, FUNCTION, METHOD) (VOID, type) subroutineName '(' parameterList ')' subroutineBody
+    // (CONSTRUCTOR, FUNCTION, METHOD) (VOID, type) subroutineName '(' parameterList ')' subroutineBody
     // Method should have +1 args, args[0] refers to the this object
     private void compileSubroutineDec() {
         symbolTable.startSubroutine();
@@ -144,7 +144,6 @@ public class CompilationEngineXML {
         this.openTag("parameterList");
         latestKind = SymbolKind.ARG;
         if (checkKeyword(true, false, types)) {
-//            checkKeyword(true, types);
             latestType = tokenizer.identifier();
             advance();
             if (checkToken(false, TokenType.IDENTIFIER)) {
@@ -305,7 +304,6 @@ public class CompilationEngineXML {
 
     private void compileExpressionList() {
         openTag("expressionList");
-//        isExpression();
         if (!checkSymbol(false, ')')) {
             compileExpression();
         }
@@ -337,7 +335,6 @@ public class CompilationEngineXML {
         }
         //  varName | varName '[' expression ']'
         else if (checkToken(false, TokenType.IDENTIFIER)) {
-//            ArrayList<String> buffer = tokenizer.getInputBuffer();
             Token lookaheadToken = tokenizer.getLookaheadToken();
             if (lookaheadToken != null) {
                 if (lookaheadToken.tokenType() == TokenType.SYMBOL) {
@@ -349,7 +346,6 @@ public class CompilationEngineXML {
                         compileExpression();
                         checkSymbol(']');
                     } else {
-//                        advance();
                         checkToken(TokenType.IDENTIFIER);
                     }
                 }
@@ -392,10 +388,6 @@ public class CompilationEngineXML {
         boolean result = false;
         for (TokenType t : tokenType) {
             if (t == tokenizer.tokenType()) {
-                if (t == TokenType.IDENTIFIER && advance) {
-//                    System.out.println("IDENTIFIER : " + tokenizer.currentTerm);
-//                    System.out.println(tokenizer.toXML());
-                }
                 result = true;
             }
         }
@@ -449,8 +441,6 @@ public class CompilationEngineXML {
     private boolean checkKeyword(boolean allowIdentifier, boolean advance, Keyword... expectedKeywords) {
         boolean result = false;
         if (allowIdentifier && tokenizer.tokenType() == TokenType.IDENTIFIER) {
-//            System.out.println("IDENTIFIER : " + tokenizer.currentTerm);
-//            System.out.println(tokenizer.toXML());
             result = true;
         } else if (tokenizer.tokenType() == TokenType.KEYWORD) {
             for (Keyword k : expectedKeywords) {
@@ -462,7 +452,7 @@ public class CompilationEngineXML {
         if (result && advance) {
             advance();
         }
-        if (result == false && advance) {
+        if (!result && advance) {
             halt(TokenType.KEYWORD.toString(), Arrays.toString(expectedKeywords));
         }
         return result;
@@ -479,9 +469,6 @@ public class CompilationEngineXML {
     }
 
     private boolean advance() {
-//		if (halt) {
-//			System.exit(0);
-//		}
         write(tokenizer.toXML());
         if (tokenizer.hasMoreTokens()) {
             tokenizer.advance();
@@ -495,18 +482,13 @@ public class CompilationEngineXML {
         try {
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < indent; i++) {
-                // sb.append("\t");
                 sb.append("  ");
             }
             sb.append(s);
-            fw.write(sb.toString() + "\n");
+            fw.write(sb + "\n");
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void writeXML() {
-        this.write(tokenizer.toXML());
     }
 
     private void openTag(String text) {
@@ -534,11 +516,7 @@ public class CompilationEngineXML {
                 out.append(" ");
             }
         }
-        System.out.println("[LOG] " + out.toString());
-    }
-
-    private void halt() {
-        halt(null, null);
+        System.out.println("[LOG] " + out);
     }
 
     private void halt(String expectedType, String expectedValue) {
@@ -547,7 +525,6 @@ public class CompilationEngineXML {
         } catch (IOException e) {
             log("[PARSER]", "Error closing file...");
         }
-//        System.out.println();
         boolean first = true;
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
         for (int i = stackTrace.length - 1; i >= 0; i--) {
@@ -558,7 +535,6 @@ public class CompilationEngineXML {
                 log("", stackTrace[i].toString());
             }
         }
-//        System.out.println("");
         log("[PARSER]", "Exception on line " + tokenizer.getLineCount() + " at token '" + tokenizer.identifier() + "'");
         log("", "Expected " + expectedType + " " + expectedValue);
         System.exit(1);
