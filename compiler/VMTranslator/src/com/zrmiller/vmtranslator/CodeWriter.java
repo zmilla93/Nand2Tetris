@@ -19,7 +19,7 @@ public class CodeWriter {
     private int ltCount = 0;
     private int callCount = 0;
 
-    public CodeWriter(String fileName, boolean comment, boolean collapse) {
+    public CodeWriter(String fileName, boolean init, boolean comment, boolean collapse) {
         try {
             output = new FileWriter(fileName);
         } catch (IOException e) {
@@ -28,7 +28,7 @@ public class CodeWriter {
         }
         autoComment = comment;
         autoCollapse = collapse;
-        writeInit();
+        if (init) writeInit();
     }
 
     private void writeInit() {

@@ -10,16 +10,15 @@ public class Main {
     private static int fileCount = 0;
     private static String[] fileInStringArray;
     private static boolean debug = false;
+    private static boolean init = true;
 
     public static void main(String[] args) {
         long time = System.currentTimeMillis();
         System.out.println("Virtual machine started...");
         if (args.length > 0) fileInString = args[0];
         for (String s : args) {
-            if (s.equals("-debug")) {
-                debug = true;
-                break;
-            }
+            if (s.equals("-debug")) debug = true;
+            if (s.equals("-noinit")) init = false;
         }
         File fileIn = new File(fileInString);
         if (fileIn.isFile()) {
@@ -52,7 +51,7 @@ public class Main {
             if (fileInString.equals("")) terminateEarly("No file or directory specified.");
             else terminateEarly("No file or directory found at \"" + fileInString + "\".");
         }
-        CodeWriter code = new CodeWriter(fileOutString, false, false);
+        CodeWriter code = new CodeWriter(fileOutString, init, false, false);
         for (String s : fileInStringArray) {
             System.out.println("\tParsing file \"" + s + "\"...");
             Parser p = new Parser(s);
